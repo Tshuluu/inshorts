@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Animated,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -36,12 +34,11 @@ const CategoryProductsScreen = ({ route, navigation }) => {
       const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       const filtered = allProducts.filter(item =>
-  item.gender &&
-  item.category &&
-  item.gender.toLowerCase() === gender.toLowerCase() &&
-  item.category.toLowerCase() === category.toLowerCase()
-);
-
+        item.gender &&
+        item.category &&
+        item.gender.toLowerCase() === gender.toLowerCase() &&
+        item.category.toLowerCase() === category.toLowerCase()
+      );
 
       setProducts(filtered);
     } catch (error) {
@@ -52,36 +49,15 @@ const CategoryProductsScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => {
-    const scale = useRef(new Animated.Value(1)).current;
-
-    const handlePress = () => {
-      Animated.sequence([
-        Animated.timing(scale, {
-          toValue: 0.95,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        navigation.navigate('ProductDetail', { product: item });
-      });
-    };
-
-    return (
-      <TouchableWithoutFeedback onPress={handlePress}>
-        <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
-          <Image source={{ uri: item.image }} style={styles.image} />
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.price}>₹{item.price}</Text>
-        </Animated.View>
-      </TouchableWithoutFeedback>
-    );
-  };
+  const renderItem = useCallback(
+    ({ item }) => (
+      <SimpleProductCard
+        item={item}
+        onPress={() => navigation.navigate('ProductDetail', { product: item })}
+      />
+    ),
+    [navigation]
+  );
 
   return (
     <View style={styles.container}>
@@ -105,6 +81,18 @@ const CategoryProductsScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
+// 🔻 Moved outside for performance
+const SimpleProductCard = ({ item, onPress }) => (
+  <TouchableOpacity style={styles.card} onPress={onPress}>
+    <Image
+      source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }}
+      style={styles.image}
+    />
+    <Text style={styles.name}>{item.name}</Text>
+    <Text style={styles.price}>₹{item.price}</Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {

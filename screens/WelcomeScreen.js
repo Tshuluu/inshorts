@@ -4,21 +4,23 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 export default function WelcomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../assets/shopping-bag.png')} // Replace with your own icon
-        style={styles.image}
-      />
-      <Text style={styles.title}>Find Your Next Style</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.buttonText}>Shop Now</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+  <View style={styles.container}>
+    <Image
+      source={require('../assets/shopping-bag.png')} // ✅ Make sure this path is correct
+      style={styles.image}
+    />
+
+    <Text style={styles.title}>Find Your Next Style</Text>
+
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => navigation.navigate('Login')}
+    >
+      <Text style={styles.buttonText}>Shop Now</Text>
+    </TouchableOpacity>
+  </View>
+);
+};
 
 const styles = StyleSheet.create({
   container: {

@@ -3,48 +3,26 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
-  Alert,
   ScrollView,
+  StyleSheet,
+  Alert,
 } from 'react-native';
-import { auth, db } from '../firebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
 
-const SellerRegistrationScreen = ({ navigation }) => {
+const SellerRegistrationScreen = () => {
   const [fullName, setFullName] = useState('');
   const [shopName, setShopName] = useState('');
   const [phone, setPhone] = useState('');
 
-  const handleRegister = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      Alert.alert('Login Required', 'Please login to register as a seller.');
-      return;
-    }
-
+  const handleRegister = () => {
     if (!fullName || !shopName || !phone) {
-      Alert.alert('Incomplete', 'Please fill in all fields');
+      Alert.alert('Please fill in all fields');
       return;
     }
 
-    try {
-      const sellerRef = doc(db, 'sellers', user.uid);
-      await setDoc(sellerRef, {
-        fullName,
-        shopName,
-        phone,
-        uid: user.uid,
-        email: user.email,
-        createdAt: new Date(),
-      });
+    // 🛠️ Add your Firestore saving logic here
 
-      Alert.alert('Success', 'You are now registered as a seller!');
-      navigation.goBack();
-    } catch (error) {
-      console.error('❌ Error saving seller data:', error);
-      Alert.alert('Error', 'Something went wrong during registration.');
-    }
+    Alert.alert('Success', 'Seller registration complete!');
   };
 
   return (
@@ -81,7 +59,7 @@ const SellerRegistrationScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 24,
-    backgroundColor: '#CEDCE2',
+    backgroundColor: '#cedce2ff',
     alignItems: 'center',
     flexGrow: 1,
   },

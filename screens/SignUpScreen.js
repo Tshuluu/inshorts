@@ -1,41 +1,30 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  Alert,
-  StyleSheet,
   TouchableOpacity,
-} from "react-native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
-import { useNavigation } from "@react-navigation/native";
+  StyleSheet,
+  Alert,
+} from 'react-native';
 
-export default function SignUpScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigation = useNavigation();
+const SignUpScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSignUp = () => {
     if (!email || !password) {
-      Alert.alert("Missing Fields", "Please fill all fields");
+      Alert.alert('Error', 'Please fill in both fields');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert("Weak Password", "Password must be at least 6 characters");
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        Alert.alert("Welcome", `Account created for ${user.email}`);
-        navigation.replace("Main"); 
-      })
-      .catch((error) => {
-        Alert.alert("Signup Failed", error.message);
-      });
+    // 👉 Replace this with Firebase sign-up logic
+    Alert.alert('Success', 'Account created!');
   };
 
   return (
@@ -62,41 +51,48 @@ export default function SignUpScreen() {
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Login')}
+        style={{ marginTop: 20 }}
+      >
+        <Text style={{ textAlign: 'center', color: 'blue' }}>
+          Already have an account? Login
+        </Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     padding: 24,
     backgroundColor: "#CEDCE2",
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
-    marginBottom: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 30,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
+    borderBottomWidth: 1,
+    marginBottom: 20,
     fontSize: 16,
+    paddingVertical: 8,
   },
   button: {
-    backgroundColor: "#2196F3",
+    backgroundColor: 'black',
     padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
+    borderRadius: 10,
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
+
+export default SignUpScreen;

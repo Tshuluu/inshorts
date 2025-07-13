@@ -87,7 +87,7 @@ const SellerRegistration = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#CEDCE2',
+    backgroundColor: '#c0c2c3ff',
     flexGrow: 1,
   },
   title: {

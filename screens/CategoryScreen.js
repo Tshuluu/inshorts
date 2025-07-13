@@ -50,15 +50,15 @@ const CategoryProductsScreen = ({ route, navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate('ProductDetail', { product: item })}
-    >
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.price}>₹{item.price}</Text>
-    </TouchableOpacity>
-  );
+  <TouchableOpacity
+    style={styles.card}
+    onPress={() => navigation.navigate('ProductDetail', { product: item })}
+  >
+    <Image source={{ uri: item.image }} style={styles.image} />
+    <Text style={styles.name}>{item.name || 'No name'}</Text>
+    <Text style={styles.price}>₹{item.price != null ? item.price : 'N/A'}</Text>
+  </TouchableOpacity>
+);
 
   return (
     <View style={styles.container}>
@@ -86,7 +86,7 @@ const CategoryProductsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#acc6c4ff',
     flex: 1,
   },
   header: {
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   price: {
-    color: 'green',
+    color: 'black',
     fontSize: 13,
     marginTop: 4,
   },

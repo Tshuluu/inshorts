@@ -33,9 +33,19 @@
       },
       "package": "com.yourcompany.dressly",
       "versionCode": 1,
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "statusBar": {
+        "hidden": false,
+        "translucent": false,
+        "barStyle": "dark-content",
+        "backgroundColor": "#ffffff"
+      },
+      "navigationBar": {
+        "visible": "immersive",
+        "barStyle": "dark-content",
+        "backgroundColor": "#ffffff"
+      }
     },
-    
     "web": {
       "favicon": "./assets/favicon.png"
     },

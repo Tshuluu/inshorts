@@ -8,7 +8,9 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+ import RazorpayCheckout from 'react-native-razorpay'; // ✅ Add this import at the top
 import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const ProductDetailScreen = () => {
   const route = useRoute();
@@ -25,27 +27,61 @@ const ProductDetailScreen = () => {
     );
   }
 
-  const handleAddToCart = () => {
-    Alert.alert('Cart', `${product.name || 'Item'} added to cart`);
+  const handleAddToCart = async () => {
+    try {
+      const existingCartItemsString = await AsyncStorage.getItem('cartItems');
+      let cartItems = existingCartItemsString ? JSON.parse(existingCartItemsString) : [];
+      const productId = product.id;
+      const productToAdd = {...product, quantity: 1}; // Add quantity property to the product
+
+      const isItemInCart = cartItems.some(item => item.id === productId);
+
+      if (isItemInCart) {
+        const updatedCart = cartItems.map(item =>
+          item.id === productId ? {...item, quantity: item.quantity + 1} : item
+        );
+        await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
+        Alert.alert('Cart', `${product.name || 'Item'} quantity updated in cart`);
+      } else {
+        cartItems.push(productToAdd);
+        await AsyncStorage.setItem('cartItems', JSON.stringify(cartItems));
+        Alert.alert('Cart', `${product.name || 'Item'} added to cart`);
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      Alert.alert('Error', 'Could not add item to cart.');
+    }
   };
 
-  const handleBuyNow = () => {
-    Alert.alert(
-      'Buy Now',
-      `Do you want to buy "${product.name}" for ₹${product.price}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Proceed',
-          onPress: () => {
-            Alert.alert('Checkout', 'Proceeding to checkout...');
-          },
-        },
-      ]
-    );
+ 
+const handleBuyNow = () => {
+  const options = {
+    description: 'Purchase from Drobe',
+    image: 'https://example.com/logo.png',
+    currency: 'INR',
+    key: 'rzp_test_1DP5mmOlF5G5ag',
+    amount: product.price * 100,
+    name: 'Drobe',
+    prefill: {
+      email: 'test@drobe.com',
+      contact: '9999999999',
+      name: 'Test User',
+    },
+    theme: { color: '#F37254' },
   };
+
+  RazorpayCheckout.open(options)
+    .then((data) => {
+      console.log('Payment Success:', data);
+      Alert.alert('Success', `Payment ID: ${data.razorpay_payment_id}`);
+    })
+    .catch((error) => {
+      console.log('Payment Error:', error);
+      Alert.alert('Payment Failed', error.description || JSON.stringify(error));
+    });
+};
+
   console.log('Product:', product);
-
 
   return (
     <ScrollView style={styles.container}>
@@ -76,7 +112,7 @@ export default ProductDetailScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#CEDCE2',
+    backgroundColor: '#cedce2ff',
     padding: 16,
   },
   centered: {

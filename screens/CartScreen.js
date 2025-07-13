@@ -1,50 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { auth, db } from '../firebaseConfig';
-import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CartScreen = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-
-    if (!currentUser) {
-      Alert.alert('Login Required', 'Please login to view your cart.');
-      return;
-    }
-
-    const q = query(collection(db, 'cart'), where('userId', '==', currentUser.uid));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCartItems(items);
-    });
-
-    return () => unsubscribe();
+    loadCartItems();
   }, []);
 
-  const removeFromCart = async (id) => {
+  const loadCartItems = async () => {
     try {
-      await deleteDoc(doc(db, 'cart', id));
-      Alert.alert('Removed', 'Item removed from cart.');
+      const cartItemsString = await AsyncStorage.getItem('cartItems');
+      const items = cartItemsString ? JSON.parse(cartItemsString) : [];
+      setCartItems(items);
     } catch (error) {
-      console.error('Error removing item:', error);
-      Alert.alert('Error', 'Could not remove item.');
+      console.error('Error loading cart items:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderItem = ({ item }) => (
+  const removeFromCart = async (index) => {
+    try {
+      const updatedCartItems = [...cartItems];
+      updatedCartItems.splice(index, 1);
+      setCartItems(updatedCartItems);
+      await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    }
+  };
+
+  const renderItem = ({ item, index }) => (
     <View style={styles.item}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.price}>₹{item.price}</Text>
-      <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-        <Text style={styles.remove}>Remove</Text>
+      <Image source={{ uri: item.image || 'https://via.placeholder.com/80' }} style={styles.image} />
+      <View style={styles.itemDetails}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.price}>₹{item.price}</Text>
+      </View>
+      <TouchableOpacity onPress={() => removeFromCart(index)} style={styles.removeButton}>
+        <Text style={styles.removeText}>Remove</Text>
       </TouchableOpacity>
     </View>
   );
+
+  if (loading) {
+    return <View><Text>Loading cart...</Text></View>;
+  }
 
   return (
     <View style={styles.container}>
@@ -53,7 +57,7 @@ const CartScreen = () => {
       ) : (
         <FlatList
           data={cartItems}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => index.toString()}
           renderItem={renderItem}
         />
       )}
@@ -61,31 +65,43 @@ const CartScreen = () => {
   );
 };
 
-export default CartScreen;
-
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 16,
+    backgroundColor: '#c0c2c3ff',
   },
   item: {
-    backgroundColor: '#f1f1f1',
-    marginBottom: 12,
-    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  image: {
+    width: 80,
+    height: 80,
     borderRadius: 8,
+    marginRight: 10,
+  },
+  itemDetails: {
+    flex: 1,
   },
   name: {
     fontWeight: 'bold',
     fontSize: 16,
   },
   price: {
-    fontSize: 14,
-    color: 'gray',
-    marginVertical: 6,
+    color: 'green',
   },
-  remove: {
-    color: 'red',
-    marginTop: 6,
+  removeButton: {
+    backgroundColor: '#acc6c4ff',
+    padding: 8,
+    borderRadius: 5,
+  },
+  removeText: {
+    color: 'white',
   },
 });
+
+export default CartScreen;

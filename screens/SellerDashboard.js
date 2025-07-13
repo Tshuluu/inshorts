@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#CEDCE2',
+    backgroundColor: '#cedce2ff',
   },
   infoBox: {
     backgroundColor: '#f2f2f2',
